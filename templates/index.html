@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/x-icon" href="/static/flame-png-4872.png">
+    <title>Translation Chat</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #272626;
+    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px;
+    color: #fdfafa;
+    text-decoration: none;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #272626;
+}
+
+.sidebar a:hover {
+    background-color: #5b5b5c;
+}
+
+.content {
+    flex: 1;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #3c3c3c;
+    position: relative;
+}
+
+.chatbox {
+    height: 400px;
+    overflow: auto;
+    background-color: #3c3c3c;
+    border: 1px solid #3c3c3c;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.message {
+    margin-bottom: 10px;
+    max-width: 80%;
+    word-wrap: break-word;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.user {
+    color: rgb(252, 252, 252);
+    background-color: #4b4b4b;
+    border: 1px solid #4b4b4b;
+    align-self: flex-end; /* Align user messages to the right */
+}
+
+.bot {
+    color: rgb(255, 255, 255);
+    background-color: #5f5f5f;
+    border: 1px solid #5f5f5f;
+    align-self: flex-start; /* Align bot messages to the left */
+}
+
+.input-box {
+    display: flex;
+    position: absolute;
+    bottom: 20px;
+    width: calc(100% - 40px); /* Adjust width to match content area */
+    padding: 10px;
+    background-color: #3c3c3c;
+    border-top: 1px solid #3c3c3c;
+    justify-content: center; /* Center child elements horizontally */
+}
+
+input[type="text"] {
+    width: calc(80% - 30px); /* Adjust width as needed */
+    height: 60px;
+    padding: 10px; /* Adjust padding for better appearance */
+    color: white;
+    font-size: 15px;
+    box-sizing: border-box;
+    border: 1px solid #5b5b5c;
+    border-radius: 30px;
+    background-color: #5b5b5c;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    background-color: #626263;
+    color: white;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+input[type="text"]::placeholder {
+    color: white; 
+    opacity: 1; 
+}
+
+button:hover {
+    background-color: #4b4b4b;
+}
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2><br>Languages Options</h2>
+        <a href="/set_lang_pair/sp-en" onclick="setLangPair('sp-en')">Spanish-English</a>
+        <a href="/set_lang_pair/en-kr" onclick="setLangPair('en-kr')">English-Korean</a>
+        <a href="/set_lang_pair/kr-en" onclick="setLangPair('kr-en')">Korean-English</a>
+        <a href="/set_lang_pair/fr-en" onclick="setLangPair('fr-en')">French-English</a>
+    </div>
+    <div class="content">
+        <h1>Translate with Flare</h1>
+        <div class="chatbox" id="chatbox">
+            <!-- Messages will be appended here -->
+        </div>
+        <div class="input-box">
+            <input type="text" id="message" placeholder="Type your message here...">
+            <button id="send"><i class='bx bxs-send'></i></button>
+        </div>
+    </div>
+
+    <script>
+        var chatbox = document.getElementById("chatbox");
+        var message = document.getElementById("message");
+        var send = document.getElementById("send");
+        var langPair = 'kr-en';  // Default language pair
+      
+        function setLangPair(pair) {
+            langPair = pair;
+        }
+      
+        send.addEventListener("click", function() {
+    var userMessage = message.value;
+
+    // Check if the input exceeds 100 characters
+    if (userMessage.length > 100) {
+        alert("Message cannot exceed 100 characters!");
+        return; // Stop further execution if the limit is exceeded
+    }
+
+    var userDiv = document.createElement("div");
+    userDiv.className = "message user";
+    userDiv.innerHTML = "<strong>You:</strong> " + userMessage;
+    chatbox.appendChild(userDiv);
+    
+    message.value = "";
+    
+    fetch("/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: new URLSearchParams({
+            text: userMessage,
+            lang_pair: langPair
+        })
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        var botDiv = document.createElement("div");
+        botDiv.className = "message bot";
+        botDiv.innerHTML = "<strong>Flare:</strong> " + data.translated_text;
+        chatbox.appendChild(botDiv);
+        
+        chatbox.scrollTop = chatbox.scrollHeight;
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+    });
+});
+
+      </script>
+      
+</body>
+</html>
