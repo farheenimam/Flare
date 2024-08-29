@@ -88,24 +88,16 @@ While the `granite-20b-multilingual` model offers impressive translation accurac
 
 1. Clone the repository:
 
-
-
    ```bash
-
    git clone https://github.com/yourusername/flare.git
-
    ```
 
 
 
 2. Navigate to the project directory:
 
-
-
    ```bash
-
    cd flare
-
    ```
 
 
@@ -124,12 +116,8 @@ While the `granite-20b-multilingual` model offers impressive translation accurac
 
 4. Run the Flask application:
 
-
-
    ```bash
-
    python app.py
-
    ```
 
 
