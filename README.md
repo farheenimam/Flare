@@ -2,7 +2,7 @@
 
 <p align="center">
 
- <img src="profily.png">
+ <img src="image.png">
 
  <br>
 
